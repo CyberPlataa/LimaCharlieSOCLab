@@ -1,4 +1,4 @@
-<h1>JWipe - LimaCharlie SOC (EDR)</h1>
+<h1>We Are SO Back- LimaCharlie SOC (EDR)</h1>
 
 <h2>Description</h2>
 I created a SOC lab again! This time, I used two small vm's (Microsoft 11, and Ubuntu Server 64). I installed LIMA charlie onto the windows vm, after removing all of its firewalls, I used the Ubuntu Server as an attack VM. Deploying and launching a pay load (Silver surfer) to create incidents and break into the VM. This created various incidents, allowing me to observe, respond, and eventually block. This served as a super valuable experience to get HANDS on SOC training. 
@@ -9,11 +9,15 @@ I created a SOC lab again! This time, I used two small vm's (Microsoft 11, and U
 
 - <b>PowerShell</b> 
 - <b>CMD</b>
-- 
+- <b>Sliver_Server</b>
+- <b>Windows Defender</b>
+- <b>Regedit</b>
+- <b>Local Group Policy Editor</b>
 
 <h2>Environments Used </h2>
 
-- <b>Windows 10</b> (21H2)
+- <b>Windows 11</b>
+ - <b>Ubuntu Server 64</b>
 
 <h2>Program walk-through:</h2>
 
